@@ -1,6 +1,10 @@
 #include "E101.h"
+#include <iostream>
+
+using namespace std;
 
 class Robot{ // declarations
+	
 private:
 	int v_left, v_right, cam_tilt;
 	int dv;
@@ -8,6 +12,7 @@ private:
 	int quadrant;
 	const int cam_width = 320;
 	const int cam_height = 240;
+	const int cam_mid = cam_height/2;
 	const int v_left_go = 52;
 	const int v_right_go = 43;
 	double kp = 0.05; // I think this is a good value? might change with testing
@@ -21,6 +26,25 @@ public:
 	int MeasureLine();
 	int FollowLine();
 };
+
+int MeasureLine(){
+			count=0;
+			int min_white = 255;
+			int max_white = 0;
+			while(count <= cam_width){	// go through every pixel in the mid line
+				
+				// gets min and max white values
+				int white = get_pixel(cam_mid,count,3);
+				if (white<min_white){
+					min_white = white;
+					}
+				if (white>max_white){
+					max_white = white;
+				}
+				count++;
+			}
+			int median_white = (max_white-min_white)/2; // up to here
+	}
 
 // example of implementation
 int Robot::FollowLine()(){
@@ -43,15 +67,29 @@ int Robot::FollowLine()(){
 	return 0;
 }
 
-int main(){
+int quadrant_1(){
 	// opens gate
-	char server_addr[15] = {'1','3','0','.','1','9','5','.','1','9','6'};
+	char server_addr[15] = {'1','3','0','.','1','9','5','.','6','.','1','9','6'};
 	char message[24] = {'P','l','e','a','s','e'};
 	char password[24];
-	int connect_to_server(server_addr);
-	int send_to_server(message);
-	int receive_from_server(password);
-	int send_to_server(password);
+	connect_to_server(server_addr,1024);
+	send_to_server(message);
+	receive_from_server(password);
+	send_to_server(password);
+	return 0;
+	}
+
+int quadrant_2(){
+	
+	return 0;
+	}
+
+int main(){
+	quadrant_1();
+	
+	
 }
+
+
 
 
