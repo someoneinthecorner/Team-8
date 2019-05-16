@@ -85,6 +85,7 @@ int quadrant_2(){
 	}
 
 int main(){
+	init(1);
 	quadrant_1();
 	
 	
