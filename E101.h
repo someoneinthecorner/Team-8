@@ -1,6 +1,7 @@
 
-void stop(int);
-int init();
+void stoph();
+int init(int debug_level);
+// camera functions
 int take_picture();
 int save_picture(char fn[5]);
 char get_pixel( int row,int col, int color);
@@ -10,15 +11,14 @@ int open_screen_stream();
 int close_screen_stream();
 int update_screen();
 int display_picture(int delay_sec,int delay_usec);
-int set_motor(int motor,int speed);
-int sleep1(int sec, int usec);
-int select_IO(int chan, int direct);
-int write_digital(int chan,char level);
+// hardware control functions
+int set_motors(unsigned char num_mot,unsigned char pwm);
+int sleep1(int msec);
+int set_digital(unsigned char chan,unsigned char level);
 int read_digital(int chan);
 int read_analog(int in_ch_adc);
-int set_PWM(int chan, int value);
-int set_PWM_frequency(int chan, int freq);
-int set_servo(int chan, int value);
+int hardware_exchange();
+// networking functions
 int connect_to_server( char server_addr[15],int port);
 int send_to_server(char message[24]);
 int receive_from_server(char message[24]);
