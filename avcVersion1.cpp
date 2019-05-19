@@ -4,7 +4,7 @@
 using namespace std;
 
 class Robot{ // declarations
-	
+	  
 private:
 	int v_left, v_right, cam_tilt;
 	int dv;
