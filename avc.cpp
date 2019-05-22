@@ -17,16 +17,17 @@ private:
 	const int v_right_go = 43;
 	double kp = 0.05; // I think this is a good value? might change with testing
 	int line_present = 1;
-	int indexes[] = new int{cam_width}; 
-	int bw[] = new int{cam_width};
+	int *indexes = new int[cam_width]; 
+	int *bw  = new int[cam_width];
 
 public:
-	//Rob(){} // default constructor
+	Robot(){} // default constructor
 	int InitHardware();
 	void ReadSetMotors();
 	void SetMotors();
 	int MeasureLine();
 	int FollowLine();
+	int OpenGate();
 };
 
 int Robot::MeasureLine(){
@@ -108,7 +109,11 @@ int Robot::FollowLine(){
 	return 0;
 }
 
-int quadrant_1(){
+int Robot::SetMotors(){
+	//need to create this
+	}
+
+int Robot::OpenGate(){
 	// opens gate
 	char server_addr[15] = {'1','3','0','.','1','9','5','.','6','.','1','9','6'};
 	char message[24] = {'P','l','e','a','s','e'};
@@ -120,11 +125,11 @@ int quadrant_1(){
 	return 0;
 	}
 
-
 int main(){
 	init(1);//Initialised
-	quadrant_1();
-	FollowLine();
+	Robot Rob;
+	Rob.OpenGate();
+	Rob.FollowLine();
 }
 
 
