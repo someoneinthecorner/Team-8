@@ -1,0 +1,13 @@
+Quadrant 1:
+  Connect to server
+  Request password from server
+  Server responds
+  Send password back to server to server
+  
+Quadrant 2:
+  First measure line from image from camera by going through pixels in middle line
+  Find the max white value and min white value to determine the threshold between white and black
+  Use this to find where the black line is and calculate error
+  Adjust motor speeds to turn depending on the error value (turn right or left, how far left etc.)
+  Unless line has dissapeared, then go backwards and repeat
+  Update motor speed and hardware
