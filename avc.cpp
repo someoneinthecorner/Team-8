@@ -18,7 +18,7 @@ private:
 	const int cam_mid = cam_height/2;
 	const int cam_midPlus = (cam_height/2)+(cam_height/4);
 	const int v_left_go = 52;
-	const int v_right_go = 43;
+	const int v_right_go = 44;
 	double kp = 0.05; // I think this is a good value? might change with testing
 	int line_present = 1;
 	int turn_left=0;
@@ -32,10 +32,7 @@ private:
 
 public:
 	Robot(){} // default constructor
-	int InitHardware();
-	void ReadSetMotors();
 	void SetMotors();
-	void update_hardware();
 	int MeasureLine();
 	int FollowLine();
 	int OpenGate();
@@ -137,7 +134,7 @@ int Robot::FollowLine(){
 			v_left = 49;	
 			v_right = v_right_go;
 		}
-		if (turn_right){	
+		else if (turn_right){	
 			v_left = v_left_go;	
 			v_right = 47;
 		}
@@ -160,8 +157,10 @@ int Robot::FollowLine(){
 }
 
 void Robot::SetMotors(){
+	cout<<"v_left = "<<v_left<<endl;
+	cout<<"v_right = "<<v_right<<endl;
 	set_motors(5,v_left); //ask about this
-	set_motors(1,v_right);
+	set_motors(4,v_right);
 	hardware_exchange();
 	}
 
@@ -179,11 +178,13 @@ int Robot::OpenGate(){
 
 int main(){
 	Robot Rob;
-	Rob.InitHardware();//Initialised
+	init(0);//Initialised
 	open_screen_stream();
 	Rob.OpenGate();
 	int quadrant = Rob.get_quadrant();
 	while(quadrant!=4){
+		take_picture();
+		update_screen();
 		Rob.FollowLine();
 	}
 
