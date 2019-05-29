@@ -35,6 +35,7 @@ public:
 	void SetMotors();
 	int MeasureLine();
 	int FollowLine();
+	int MeasureColor();
 	int OpenGate();
 	int get_quadrant();
 };
@@ -124,6 +125,15 @@ int Robot::MeasureLine(){
 
 			return 0;
 	} 
+	
+int Robot::MeasureColor(){
+	while(count <= cam_width){	// go through every pixel in the mid line
+		int red = get_pixel(cam_mid, count, 0);
+		int green = get_pixel(cam_mid, count, 1);
+		int blue = get_pixel(cam_mid, count, 2);
+		
+	}
+	}
 
 
 // example of implementation
