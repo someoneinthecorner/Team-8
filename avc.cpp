@@ -11,21 +11,16 @@ private:
 	double line_error = 0;
 	int quadrant = 2;
 	int median_white;
-	int prevMedian;
 	int prevDiff = 255;
 	const int cam_width = 320;
 	const int cam_height = 240;
 	const int cam_mid = cam_height/2;
 	const int cam_midPlus = (cam_height/2)+(cam_height/4);
 	const int v_left_go = 52;
-	const int v_right_go = 44;
+	const int v_right_go = 41;
 	double kp = 0.05; // I think this is a good value? might change with testing
 	int line_present = 1;
-	int turn_left=0;
-	int turn_right=0;
-	int running=1;
-	int prev_turn=0;
-	int turns=0;
+	int intersection = false;
 	int *indexes = new int[cam_width]; 
 	int *bw  = new int[cam_width];
 	int total_ahead = 0; 
@@ -38,6 +33,7 @@ public:
 	int MeasureColor();
 	int OpenGate();
 	int get_quadrant();
+	int stop();
 };
 
 int Robot::get_quadrant(){
@@ -45,12 +41,11 @@ int Robot::get_quadrant(){
 	}
 
 int Robot::MeasureLine(){
-			turn_left = 0;	
-			turn_right = 0;
 			int count=0;
 			int white;
 			int min_white = 255;
 			int max_white = 0;
+			line_present = 1;
 			while(count <= cam_width){	// go through every pixel in the mid line
 
 				// gets min and max white values
@@ -63,21 +58,16 @@ int Robot::MeasureLine(){
 				}
 				count++;
 			}
-			int diff = max_white - min_white;	//
-			median_white = (max_white-min_white)/2; 
-  			
-			// checks if line present or if sharp turn
-			if (max_white>prevMedian){
-				if (diff < prevDiff/2){
-					line_present = 0;
-					if (turns>4){quadrant=4;}		// at dead end checks if it has completed the maze
-				}
-				else {	line_present = 1; 
-					prevDiff=diff;}
-			}
-			else{turn_left=1;}	
+			//int diff = max_white - min_white;	
+			median_white = (max_white+min_white)/2; 
+			int diff = max_white-min_white;
 			
-				int total = 0;
+			// check if intersection
+			if (diff< prevDiff/2){
+				line_present = 0;
+			}
+			
+				//int total = 0;
 				for (int i=0; i<=cam_width; i++){	// go through every pixel in the mid line
 					
 					// checks if values are black or white and adds to bw array
@@ -86,7 +76,7 @@ int Robot::MeasureLine(){
 					
 					if (white < median_white){
 						bw[i] = 1;
-						total = total+bw[i];
+						//total++; // dont know why i use total here
 					}
 					else{
 						bw[i] = 0;
@@ -95,70 +85,34 @@ int Robot::MeasureLine(){
 					if (next_white < median_white){
 						total_ahead++;
 					}
-
 				}
-
+				
 				line_error = 0; // reset line error every time
-
-				for (int i=0; i<=cam_width; i++){ // goes through bw array and calculates error
-					int j = i-(cam_width/2);
+				//total = 0;
+				for (int i=0; i<cam_width; i++){ // goes through bw array and calculates error
+					//total = total+bw[i];
+					int j = i-(cam_width/2);!! should turn left until sees line !!
 					line_error = line_error + bw[i]*j;
 				}
-
-			// this might not work if the line isn't exactly in the centre bc it wont take up half the array but will it adjust properly?
-			if (total>=(cam_width/2)){	// black line takes up more than half the array
-				if (line_error>0){		// black line on right side	
-					if (total_ahead>0){	// checks if straight line ahead
-						line_error = 0;
-					}
-					else{		
-						turn_right=1;
-					}					
-				}
-				else if (line_error<0){	// black line on left side			
-					turn_left=1;
-				}
-			}
-			if (prev_turn == 1 && turn_left==0){ // checks if left turn has been completed and adds to count of left turns
-				turns++;
-			}
+				line_error = line_error/10;
 
 			return 0;
 	} 
-	
-int Robot::MeasureColor(){
-	while(count <= cam_width){	// go through every pixel in the mid line
-		int red = get_pixel(cam_mid, count, 0);
-		int green = get_pixel(cam_mid, count, 1);
-		int blue = get_pixel(cam_mid, count, 2);
-		
-	}
-	}
-
 
 // example of implementation
 int Robot::FollowLine(){
 	MeasureLine();
 	if (line_present) {
-		if (turn_left){	// no idea if these values are correct, could be opposite
-			v_left = 49;	
-			v_right = v_right_go;
-		}
-		else if (turn_right){	
-			v_left = v_left_go;	
-			v_right = 47;
-		}
-		else{
 			dv = (int)(line_error*kp);
-			// dv=0;
 			v_left = v_left_go + dv;
 			v_right = v_right_go + dv;
 			cout<<" line_error = "<<line_error<<" dv = "<<dv;
+			SetMotors();
 		}
-		SetMotors();
-	} else {
-		// !! should turn left until sees line !!
-		cout<<" Line missing"<<endl;
+		
+	 else {
+		// turns left until finds line again but also if intersection
+		cout<<" Line missing or intersection"<<endl;
 		v_left = 49;	
 		v_right = v_right_go;
 		SetMotors();
@@ -169,8 +123,12 @@ int Robot::FollowLine(){
 void Robot::SetMotors(){
 	cout<<"v_left = "<<v_left<<endl;
 	cout<<"v_right = "<<v_right<<endl;
+	if (v_left>60){v_left=60;}
+	if (v_left<49){v_left=49;}
+	if (v_right<35){v_right=35;}
+	if (v_right>47){v_right=47;}
 	set_motors(5,v_left); //ask about this
-	set_motors(4,v_right);
+	set_motors(1,v_right);
 	hardware_exchange();
 	}
 
@@ -185,18 +143,28 @@ int Robot::OpenGate(){
 	send_to_server(password);
 	return 0;
 	}
+	
+int Robot::stop(){
+	set_motors(5,48);
+	set_motors(1,48);
+	hardware_exchange();
+	return(0);
+	}
 
 int main(){
 	Robot Rob;
 	init(0);//Initialised
 	open_screen_stream();
 	Rob.OpenGate();
-	int quadrant = Rob.get_quadrant();
-	while(quadrant!=4){
+	//int quadrant = Rob.get_quadrant();
+	int count =0;
+	while(count<100){
 		take_picture();
 		update_screen();
 		Rob.FollowLine();
+		count++;
 	}
+	Rob.stop();
 
 	close_screen_stream();
 }
