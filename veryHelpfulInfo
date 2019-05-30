@@ -1,1 +1,3 @@
-ip address of pi: 10.140.72.230
+Plan:
+Go back to last commit and instead of when linepresent = 0 making it turn, make it turn until line error = 0 and then continue
+Cry
