@@ -91,7 +91,7 @@ int Robot::MeasureLine(){
 				//total = 0;
 				for (int i=0; i<cam_width; i++){ // goes through bw array and calculates error
 					//total = total+bw[i];
-					int j = i-(cam_width/2);!! should turn left until sees line !!
+					int j = i-(cam_width/2);
 					line_error = line_error + bw[i]*j;
 				}
 				line_error = line_error/10;
