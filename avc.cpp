@@ -16,8 +16,8 @@ private:
 	const int cam_height = 240;
 	const int cam_mid = cam_height/2;
 	const int cam_midPlus = (cam_height/2)+(cam_height/4);
-	const int v_left_go = 52;
-	const int v_right_go = 41;
+	const int v_left_go = 50;
+	const int v_right_go = 46;
 	double kp = 0.05; // I think this is a good value? might change with testing
 	int line_present = 1;
 	int intersection = false;
@@ -113,7 +113,7 @@ int Robot::FollowLine(){
 	 else {
 		// turns left until finds line again but also if intersection
 		cout<<" Line missing or intersection"<<endl;
-		v_left = 49;	
+		v_left = v_right_go;	
 		v_right = v_right_go;
 		SetMotors();
 	}
@@ -158,7 +158,7 @@ int main(){
 	Rob.OpenGate();
 	//int quadrant = Rob.get_quadrant();
 	int count =0;
-	while(count<100){
+	while(count<1500){
 		take_picture();
 		update_screen();
 		Rob.FollowLine();
