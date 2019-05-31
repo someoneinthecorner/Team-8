@@ -9,6 +9,7 @@ private:
 	int v_left, v_right, cam_tilt;
 	int dv;
 	double line_error = 0;
+	double prev_error = 0;
 	int quadrant = 2;
 	int median_white;
 	int prevDiff = 255;
@@ -18,7 +19,7 @@ private:
 	const int cam_midPlus = (cam_height/2)+(cam_height/4);
 	const int v_left_go = 52;
 	const int v_right_go = 41;
-	double kp = 0.05; // I think this is a good value? might change with testing
+	double kp = 0.03; // I think this is a good value? might change with testing
 	int line_present = 1;
 	int intersection = false;
 	int *indexes = new int[cam_width]; 
@@ -36,27 +37,33 @@ public:
 	int FollowLine();
 	int MeasureColor();
 	int OpenGate();
-	int get_quadrant();
+	void get_quadrant();
 	int stop();
 	int FollowMaze();
-	int goBack();
+	void goBack();
+	void goStraight();
 };
 
-int Robot::goBack(){
-	sleep1(1000);
+void Robot::goBack(){
+	//sleep1(1000);
 	set_motors(5,40);
 	set_motors(1,55);
 	hardware_exchange();
+	sleep1(500);
 }
 
-int Robot::get_quadrant(){
+void Robot::goStraight(){
+	
+	}
+
+void Robot::get_quadrant(){
 	count = 0;
 	while(count <= cam_width){	// go through every pixel in the mid line
         int totred = totred+(int)get_pixel(cam_mid,count,0);
-	int totint = totint + (int)get_pixel(cam_mid,count,3);
-	redness = (float)totred/(3.0*(float)totint);
-	cout<<"Redness" <<redness<<endl;
-	count++;   
+		int totint = totint + (int)get_pixel(cam_mid,count,3);
+		redness = (float)totred/(3.0*(float)totint);
+		cout<<"Redness" <<redness<<endl;
+		count++;   
  }
 	if(redness < -10000){
 		quadrant = 3;
@@ -129,7 +136,6 @@ int Robot::MeasureLine(){
 
 	
 
-// example of implementation
 int Robot::FollowLine(){
 	MeasureLine();
 	if (line_present) {
@@ -137,6 +143,7 @@ int Robot::FollowLine(){
 			v_left = v_left_go + dv;
 			v_right = v_right_go + dv;
 			cout<<" line_error = "<<line_error<<" dv = "<<dv;
+			prev_error = line_error;
 			SetMotors();
 		}
 		
@@ -144,10 +151,18 @@ int Robot::FollowLine(){
 		// turns left until finds line again but also if intersection
 		cout<<" Line missing or intersection"<<endl;
 		goBack();
-		sleep1(1000);
-		v_left = v_right_go;	
-		v_right = v_right_go;
-		SetMotors();
+		if (prev_error<0){
+		//sleep1(1000);
+			v_left = v_right_go;	
+			v_right = v_right_go;
+			SetMotors();
+		}
+		else{
+			v_left = v_left_go;	
+			v_right = v_left_go;
+			SetMotors();
+		}
+		//sleep?
 	}
 	get_quadrant();
 	return 0;
@@ -161,21 +176,23 @@ int Robot::FollowMaze(){
 			v_left = v_left_go + dv;
 			v_right = v_right_go + dv;
 			cout<<" line_error = "<<line_error<<" dv = "<<dv;
-			if(turn_total = 0 and line_error < -200){
+			if(turn_total == 0){
 				cout<<"turn 1 - right"<<"\n";
 				set_motors(5,42); 
 				set_motors(1,54);
 				sleep1(4500);
+				//maybe go back a little bit
+				
 				turn_total = 1;
 			}
-			else if(turn_total = 1 and line_error < -200){
+			else if(turn_total == 1){
 				cout<<"turn 2 - right"<<"\n";
 				set_motors(5,42); 
 				set_motors(1,54);
 				sleep1(4500);
 				turn_total = 2;
 			}
-			else if(turn_total = 2 and line_error < 200){
+			else if(turn_total == 2){
 				cout<<"turn 3 - left"<<"\n";
 				set_motors(5,54); 
                                 set_motors(1,42);
@@ -183,28 +200,28 @@ int Robot::FollowMaze(){
                                 turn_total = 3;
 
 			}
-			else if(turn_total = 3 and line_error < -800){
+			else if(turn_total == 3){
 				cout<<"turn 4 - left"<<"\n";
 				set_motors(5,54); 
 				set_motors(1,42);
 				sleep1(4500);
 				turn_total = 4;
 			}
-			else if(turn_total = 4 and line_error < -200){
+			else if(turn_total == 4){
 				cout<<"turn 5 - right"<<"\n";
 				set_motors(5,42); 
 				set_motors(1,54);
 				sleep1(4500);
 				turn_total = 5;
 			}
-			else if(turn_total = 5 and line_error < -800){
+			else if(turn_total == 5){
 				cout<<"turn 6 - left"<<"\n";
 				set_motors(5,54); 
 				set_motors(1,42);
 				sleep1(4500);
 				turn_total = 6;
 			}
-			else if(turn_total = 6 and line_error < -800){
+			else if(turn_total == 6){
 				cout<<"turn 7 - right"<<"\n";
 				set_motors(5,42); 
 				set_motors(1,54);
@@ -232,7 +249,7 @@ void Robot::SetMotors(){
 	if (v_left<49){v_left=49;}
 	if (v_right<35){v_right=35;}
 	if (v_right>47){v_right=47;}
-	set_motors(5,v_left); //ask about this
+	set_motors(5,v_left); 
 	set_motors(1,v_right);
 	hardware_exchange();
 	}
@@ -270,8 +287,8 @@ int main(){
 		if(quadrant == 2){
 			Rob.FollowLine();
 		} else if(quadrant == 3){
-			Rob.FollowMaze();
 			cout<<"Quadrant 3"<<endl;
+			Rob.FollowMaze();
 		}	
 		
 		count++;
